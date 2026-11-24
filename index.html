@@ -215,7 +215,7 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 </div></div>
 
 <script>
-const APP_VERSION="2026-11-24.3";
+const APP_VERSION="2026-11-24.4";
 const PH = {
   mob:{label:"Mobilité", color:"#C9772F"},
   ren:{label:"Renforcement", color:"#1F5E73"},
@@ -324,48 +324,73 @@ function figSVG(p,col,extra){
   const at=s=>{const b=A[s.at]||A.mid;return [b[0]+(s.dx||0),b[1]+(s.dy||0)]};
   let o="";
   // sol / tapis / chaise
-  if(p.mat!==false && view!=="top") o+=`<rect x="6" y="${G+1.5}" width="138" height="3.2" rx="1.6" fill="#BFD7D2"/>`;
-  if(view!=="top") o+=`<line x1="2" y1="${G+5.5}" x2="148" y2="${G+5.5}" stroke="#E3DBCC" stroke-width="1.2"/>`;
-  if(p.prop==="chair") o+=`<path d="M50 77H84M54 77V100M80 77V100M50 77V52" stroke="#CBBFAB" stroke-width="3" stroke-linecap="round" fill="none"/>`;
-  if(p.prop==="chairF") o+=`<path d="M56 76H94M60 76V100M90 76V100" stroke="#CBBFAB" stroke-width="3" stroke-linecap="round"/>`;
+  if(p.mat!==false && view!=="top") o+=`<rect x="6" y="${G+2.6}" width="138" height="3.2" rx="1.6" fill="#BFD7D2"/>`;
+  if(view!=="top") o+=`<line x1="2" y1="${G+6.6}" x2="148" y2="${G+6.6}" stroke="#E3DBCC" stroke-width="1.2"/>`;
+  if(p.prop==="chair") o+=`<path d="M50 78H84M54 78V101M80 78V101M50 78V52" stroke="#CBBFAB" stroke-width="3" stroke-linecap="round" fill="none"/>`;
+  if(p.prop==="chairF") o+=`<path d="M56 79H94M60 79V101M90 79V101" stroke="#CBBFAB" stroke-width="3" stroke-linecap="round"/>`;
   // zones ciblées (pulsation)
   const pulse=.55+.25*Math.sin((extra.ms||0)/350);
-  (extra.zones||[]).forEach(z=>{const c=at(typeof z==="string"?{at:z}:z);o+=`<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="${z.r||9}" fill="url(#zg)" opacity="${f1(pulse)}"/>`});
-  // pied
-  const foot=(k,f,far)=>{
+  const zl=(extra.zones||[]).map(z=>{const c=at(typeof z==="string"?{at:z}:z);return `<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="${(z.r||9)+2}" fill="url(#zg)" opacity="${f1(pulse)}"/>`}).join("");
+  // formes volumiques
+  const C=(c,r)=>`<circle cx="${f1(c[0])}" cy="${f1(c[1])}" r="${f1(r)}"/>`;
+  const cap=(a,b,r1,r2)=>{const d=[b[0]-a[0],b[1]-a[1]],l=Math.hypot(d[0],d[1])||1,n=[-d[1]/l,d[0]/l];
+    return `<path d="M${f1(a[0]+n[0]*r1)} ${f1(a[1]+n[1]*r1)}L${f1(b[0]+n[0]*r2)} ${f1(b[1]+n[1]*r2)}L${f1(b[0]-n[0]*r2)} ${f1(b[1]-n[1]*r2)}L${f1(a[0]-n[0]*r1)} ${f1(a[1]-n[1]*r1)}Z"/>`+C(a,r1)+C(b,r2)};
+  const td=[S[0]-H[0],S[1]-H[1]], tl=Math.hypot(td[0],td[1])||1, perp=[-td[1]/tl,td[0]/tl];
+  const wide=view!=="side";
+  const root=(P,T,w)=>{if(!wide)return P;const s=((T[0]-P[0])*perp[0]+(T[1]-P[1])*perp[1])>=0?1:-1;return add(P,perp,s*w)};
+  const footS=(k,f)=>{
     const sd=[f[0]-k[0],f[1]-k[1]], l=Math.hypot(...sd)||1, u=[sd[0]/l,sd[1]/l];
     let fd;
     if(p.ft==="point") fd=u;
     else if(typeof p.ft==="number") fd=dirv(p.ft);
-    else if(view!=="side") return `<circle cx="${f1(f[0])}" cy="${f1(f[1])}" r="3.2" fill="${SHOE}"${far?' opacity=".45"':""}/>`;
-    else {const a=[-u[1],u[0]],b=[u[1],-u[0]];fd=(a[0]>b[0])?a:b;}
-    return L2(add(f,fd,-1),add(f,fd,6.5),4.2,SHOE,far?".45":"");
+    else if(view!=="side") return C(f,2.6);
+    else {const a1=[-u[1],u[0]],b1=[u[1],-u[0]];fd=(a1[0]>b1[0])?a1:b1;}
+    return cap(add(f,fd,-1.2),add(f,fd,6.2),2.1,1.5);
   };
-  const arm=(e,h,far)=>{const op=far?".45":"";return L2(S,e,6.4,BODY,op)+L2(e,h,4.6,SKIN,op)+`<circle cx="${f1(h[0])}" cy="${f1(h[1])}" r="2.9" fill="${SKIN}"${far?' opacity=".45"':""}/>`};
-  const leg=(k,f,far)=>{const op=far?".45":"";return L2(H,k,7.6,PANTS,op)+L2(k,f,6.2,PANTS,op)+foot(k,f,far)};
-  // côté éloigné
-  o+=leg(kF,fF,true)+arm(eF,hF,true);
-  // tronc (courbe) + bassin
+  const limbs=(far)=>{
+    const ai=far?1:0;
+    const sR=root(S,p.A[ai],wide?7.5:0), hR=root(H,p.L[ai],wide?3.8:0);
+    const [e,h]=ik(sR,p.A[ai],UA,FA,p.A[ai][2]), [k,f]=ik(hR,p.L[ai],TH,SH,p.L[ai][2]);
+    const hv=[h[0]-e[0],h[1]-e[1]],hl=Math.hypot(...hv)||1,hu=[hv[0]/hl,hv[1]/hl];
+    let g=cap(hR,k,5.2,3.4)+cap(k,f,3.3,2.1)+footS(k,f);
+    g+=cap(sR,e,3.3,2.4)+cap(e,h,2.3,1.7)+cap(h,add(h,hu,3.6),1.9,1.5);
+    return g;
+  };
+  o+=zl;
+  o+=`<g fill="${BODY}" opacity=".38">${limbs(true)}</g>`;
+  // tronc : chapelet de cercles le long de la courbe
   const c=p.c||0, mx=(H[0]+S[0])/2, my=(H[1]+S[1])/2, pa=Math.atan2(S[1]-H[1],S[0]-H[0])-Math.PI/2;
   const cx=mx+c*Math.cos(pa), cy=my+c*Math.sin(pa);
-  o+=`<path d="M${f1(H[0])} ${f1(H[1])}Q${f1(cx)} ${f1(cy)} ${f1(S[0])} ${f1(S[1])}" stroke="${BODY}" stroke-width="${view==="side"?11:13}" fill="none" stroke-linecap="round"/>`;
-  o+=`<circle cx="${f1(H[0])}" cy="${f1(H[1])}" r="${view==="side"?5.8:6.8}" fill="${PANTS}"/>`;
-  // cou + tête
-  o+=L2(S,add(S,hdv,6),4.2,SKIN);
-  if(view==="top"){
-    o+=`<circle cx="${f1(hc[0])}" cy="${f1(hc[1])}" r="7" fill="${HAIR}"/>`;
-  }else if(view==="front"){
-    o+=`<circle cx="${f1(hc[0])}" cy="${f1(hc[1])}" r="7" fill="${HAIR}"/><circle cx="${f1(hc[0]+hdv[0]*-1.3)}" cy="${f1(hc[1]+hdv[1]*-1.3)}" r="6.2" fill="${SKIN}"/>`;
-    const ex=dirv(p.hd+90);
-    [-1,1].forEach(s=>{const e=add(add(hc,ex,s*2.4),hdv,-.8);o+=`<circle cx="${f1(e[0])}" cy="${f1(e[1])}" r="1" fill="${EYE}"/>`});
-    const m=add(hc,hdv,-3.6);o+=L2(add(m,ex,-1.4),add(m,ex,1.4),.8,EYE);
+  const q=t=>[(1-t)*(1-t)*H[0]+2*(1-t)*t*cx+t*t*S[0],(1-t)*(1-t)*H[1]+2*(1-t)*t*cy+t*t*S[1]];
+  const rad=t=>wide?(t<.5?lerp(6.4,5.6,t/.5):lerp(5.6,8,(t-.5)/.4)):(t<.45?lerp(5.6,4.8,t/.45):lerp(4.8,5.8,Math.min(1,(t-.45)/.35)));
+  let tb="";
+  for(let i=0;i<10;i++){const t0=i/10,t1=(i+1)/10;tb+=cap(q(t0),q(t1),rad(t0),rad(t1));}
+  if(!wide){ // poitrine et fessiers
+    tb+=C(add(q(.74),nd,1.4),5.2)+C(add(q(.04),nd,-1.6),5);
   }else{
-    o+=`<circle cx="${f1(hc[0])}" cy="${f1(hc[1])}" r="7" fill="${HAIR}"/><circle cx="${f1(hc[0]+nd[0]*1.4)}" cy="${f1(hc[1]+nd[1]*1.4)}" r="6.1" fill="${SKIN}"/>`;
-    const nose=add(hc,nd,7.2);o+=`<circle cx="${f1(nose[0])}" cy="${f1(nose[1])}" r="1.5" fill="${SKIN}"/>`;
-    const eye=add(add(hc,nd,4),hdv,1.6);o+=`<circle cx="${f1(eye[0])}" cy="${f1(eye[1])}" r="1.05" fill="${EYE}"/>`;
+    tb+=cap(add(S,perp,-7.5),add(S,perp,7.5),3.6,3.6)+cap(add(H,perp,-4.4),add(H,perp,4.4),5,5);
+  }
+  // cou + tête
+  const neckE=add(S,hdv,7);
+  tb+=cap(S,neckE,2.6,2.3);
+  if(view==="side"){
+    tb+=`<ellipse cx="${f1(hc[0])}" cy="${f1(hc[1])}" rx="6.3" ry="6.8" transform="rotate(${f1(p.hd+90)} ${f1(hc[0])} ${f1(hc[1])})"/>`;
+    const chin=add(add(hc,nd,3.4),hdv,-3.6); tb+=C(chin,3);
+    const nose=add(add(hc,nd,6.3),hdv,.2); tb+=C(nose,1.4);
+  }else tb+=`<ellipse cx="${f1(hc[0])}" cy="${f1(hc[1])}" rx="5.8" ry="7" transform="rotate(${f1(p.hd+90)} ${f1(hc[0])} ${f1(hc[1])})"/>`;
+  o+=`<g fill="${BODY}">${tb}</g>`;
+  if(view==="side"){
+    const eye=add(add(hc,nd,3.6),hdv,1.6);o+=`<circle cx="${f1(eye[0])}" cy="${f1(eye[1])}" r="1" fill="${EYE}"/>`;
+    const ear=add(hc,nd,-.6);o+=`<ellipse cx="${f1(ear[0])}" cy="${f1(ear[1])}" rx="1.1" ry="1.7" transform="rotate(${f1(p.hd+90)} ${f1(ear[0])} ${f1(ear[1])})" fill="#56677A"/>`;
+  }else if(view==="front"){
+    const ex=dirv(p.hd+90);
+    [-1,1].forEach(sg=>{const e=add(add(hc,ex,sg*2.3),hdv,.6);o+=`<circle cx="${f1(e[0])}" cy="${f1(e[1])}" r=".95" fill="${EYE}"/>`});
+    const m=add(hc,hdv,-3.4);o+=L2(add(m,ex,-1.3),add(m,ex,1.3),.7,EYE);
   }
   // côté proche
-  o+=leg(kN,fN,false)+arm(eN,hN,false);
+  o+=`<g fill="${BODY}">${limbs(false)}</g>`;
+  // contours légers pour lire les membres proches devant le tronc
+  A.elbowN=ik(root(S,p.A[0],wide?7.5:0),p.A[0],UA,FA,p.A[0][2])[0];A.handN=ik(root(S,p.A[0],wide?7.5:0),p.A[0],UA,FA,p.A[0][2])[1];
   // flèches de mouvement
   (extra.arrows||[]).forEach(a=>{
     const b=at(a), v=dirv(a.dir), s=add(b,v,5), e=add(b,v,5+(a.len||11)), w=dirv(a.dir+150), w2=dirv(a.dir-150);
@@ -380,8 +405,8 @@ function figSVG(p,col,extra){
   let g=o;
   if(p.sc) g=`<g transform="translate(75 ${G}) scale(${p.sc}) translate(-75 -${G})">${o}</g>`;
   if(view==="top") g=`<g transform="translate(75 52) scale(.84) translate(-75 -52)">${o}</g>`;
-  const cap=extra.say?`<text x="75" y="111.5" font-size="5.6" text-anchor="middle" fill="${col}" font-family="DM Sans,sans-serif" font-weight="700" opacity="${f1(extra.sop==null?1:extra.sop)}">${esc(extra.say)}</text>`:"";
-  return `<defs><radialGradient id="zg"><stop offset="0" stop-color="#E4572E" stop-opacity=".85"/><stop offset="1" stop-color="#E4572E" stop-opacity="0"/></radialGradient></defs>`+g+cap;
+  const capt=extra.say?`<text x="75" y="111.5" font-size="5.6" text-anchor="middle" fill="${col}" font-family="DM Sans,sans-serif" font-weight="700" opacity="${f1(extra.sop==null?1:extra.sop)}">${esc(extra.say)}</text>`:"";
+  return `<defs><radialGradient id="zg"><stop offset="0" stop-color="#E4572E" stop-opacity=".85"/><stop offset="1" stop-color="#E4572E" stop-opacity="0"/></radialGradient></defs>`+g+capt;
 }
 const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
 // Rendu complet à l'instant ms
@@ -406,9 +431,9 @@ const plank={H:[67,76],S:[100,60],hd:-25,ft:90,A:[[100,120,-1],[98,120,-1]],L:[[
 
 const ANIMS={
  "Respiration diaphragmatique":{dur:2600,hold:700,zones:["belly"],
-   notes:[{at:"handN",text:"une main sur le ventre",x:48,y:68}],kf:[
-   supine({A:[[62,88,-1],[62,88,-1]],L:[[108,G,-1],[106,G,-1]],c:0,say:"Expire lentement 6 s",arr:[{at:"belly",dir:-90,dx:0,dy:-6}]}),
-   supine({A:[[62,83,-1],[62,83,-1]],L:[[108,G,-1],[106,G,-1]],c:-4,say:"Inspire 4 s : le ventre se gonfle",arr:[{at:"belly",dir:90,dx:0,dy:-10,len:6}]})]},
+   notes:[{at:"handN",text:"main sur le ventre",x:96,y:62},{at:"handF",text:"main sur la poitrine",x:26,y:68}],kf:[
+   supine({A:[[62,88,-1],[46,87,-1]],L:[[108,G,-1],[106,G,-1]],c:0,say:"Expire lentement 6 s",arr:[{at:"belly",dir:-90,dx:0,dy:-6}]}),
+   supine({A:[[62,83,-1],[46,86,-1]],L:[[108,G,-1],[106,G,-1]],c:-4,say:"Inspire 4 s : le ventre se gonfle",arr:[{at:"belly",dir:90,dx:0,dy:-10,len:6}]})]},
  "Bascule du bassin":{dur:1500,hold:1000,zones:["lumb","belly"],
    notes:[{at:"lumb",text:"bas du dos plaqué au sol",x:52,y:72}],kf:[
    supine({A:[[90,96,-1],[88,96,-1]],L:[[108,G,-1],[106,G,-1]],c:-2,say:"Inspire, dos neutre",arr:[{at:"lumb",dir:90,len:6}]}),
@@ -458,8 +483,8 @@ const ANIMS={
    {H:[66,84],S:[100,76.5],hd:-10,ft:90,A:[[117,G,1],[115,G,1]],L:[[-10,104,1],[-12,104,1]],say:"Serre fessiers et abdos, respire"}]},
  "Gainage latéral":{dur:1300,hold:1600,zones:[{at:"mid",dy:2}],
    notes:[{at:"elbowN",text:"coude sous l'épaule",x:124,y:58},{at:"H",text:"ne laisse pas tomber la hanche",x:52,y:62}],kf:[
-   {view:"front",H:[68,92],S:[103,81],hd:-18,ft:"none",A:[[122,96,1],[70,88,-1]],L:[[22,98,1],[20,99,1]],say:"Allongé sur le côté, avant-bras au sol",arr:[{at:"H",dir:-90}]},
-   {view:"front",H:[70,85],S:[105,77],hd:-13,ft:"none",A:[[124,96,1],[72,80,-1]],L:[[22,98,1],[20,99,1]],say:"Monte le bassin : épaule, hanche, pieds alignés"}]},
+   {view:"front",H:[68,91],S:[103,77],hd:-18,ft:"none",A:[[123,96,1],[72,85,-1]],L:[[22,98,1],[20,99,1]],say:"Allongé sur le côté, avant-bras au sol",arr:[{at:"H",dir:-90}]},
+   {view:"front",H:[70,82],S:[105,72],hd:-14,ft:"none",A:[[125,96,1],[74,76,-1]],L:[[22,98,1],[20,99,1]],say:"Monte le bassin : épaule, hanche, pieds alignés"}]},
  "Étirement en 4 (piriforme)":{dur:1800,hold:1000,zones:["glute"],
    notes:[{at:"footN",text:"cheville sur le genou",x:118,y:44}],kf:[
    supine({H:[82,90],A:[[80,74,-1],[78,74,-1]],L:[[82,68,1],[103,68,-1]],say:"Croise la cheville sur le genou opposé",arr:[{at:"kneeF",dir:200}]}),
@@ -469,9 +494,9 @@ const ANIMS={
    {sc:.86,H:[70,52],ta:-90,hd:-90,A:[[72,96,1],[70,96,1]],L:[[72,G,-1],[70,G,-1]],say:"Debout, pieds largeur d'épaules",arr:[{at:"H",dir:150}]},
    {sc:.86,H:[50,75],ta:-58,hd:-70,c:-1,A:[[140,40,-1],[138,40,-1]],L:[[72,G,-1],[70,G,-1]],say:"Fesses en arrière, dos droit, bras devant",arr:[{at:"H",dir:-30}]}]},
  "Fente : étirement du psoas":{dur:1700,hold:1300,zones:[{at:"H",dx:5,dy:3}],
-   notes:[{at:"kneeF",text:"genou arrière au sol",x:30,y:70},{at:"glute",text:"fessier serré",x:30,y:48}],kf:[
-   {H:[60,74],ta:-90,hd:-90,A:[[66,82,-1],[64,82,-1]],L:[[88,G,-1],[26,G,-1]],ft:undefined,say:"Genou arrière au sol, buste droit",arr:[{at:"H",dir:0}]},
-   {H:[67,76],ta:-92,hd:-95,A:[[58,-20,1],[64,82,-1]],L:[[88,G,-1],[26,G,-1]],say:"Rentre le bassin, avance, bras au ciel"}]},
+   notes:[{at:"kneeN",text:"genou arrière au sol",x:30,y:70},{at:"glute",text:"fessier serré",x:30,y:48}],kf:[
+   {H:[60,74],ta:-90,hd:-90,A:[[66,82,-1],[64,82,-1]],L:[[30,96,-1],[88,G,-1]],ft:"point",say:"Genou arrière au sol, buste droit",arr:[{at:"H",dir:0}]},
+   {H:[67,76],ta:-92,hd:-95,A:[[58,-20,1],[64,82,-1]],L:[[33,96,-1],[88,G,-1]],ft:"point",say:"Rentre le bassin, avance, bras au ciel"}]},
  "Rentrée de menton":{dur:1100,hold:1300,zones:[{at:"neck",dx:-3}],
    notes:[{at:"head",text:"regard horizontal",x:112,y:16}],kf:[
    {mat:false,prop:"chair",H:[66,74],ta:-88,hd:-70,A:[[84,72,1],[82,72,1]],L:[[90,G,-1],[88,G,-1]],say:"Tête en avant : la position à corriger",arr:[{at:"head",dir:180,dx:-6,len:8}]},
