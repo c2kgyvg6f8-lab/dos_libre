@@ -215,7 +215,7 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 </div></div>
 
 <script>
-const APP_VERSION="2026-11-24.1";
+const APP_VERSION="2026-11-24.2";
 const PH = {
   mob:{label:"Mobilité", color:"#C9772F"},
   ren:{label:"Renforcement", color:"#1F5E73"},
@@ -424,8 +424,8 @@ const ANIMS={
    {H:[76,92],S:[42,92],hd:180,A:[[92,96,-1],[90,96,-1]],L:[[104,G,-1],[102,G,-1]],say:"Pieds à plat, talons près des fesses",arr:[{at:"H",dir:-90}]},
    {H:[74,72],S:[42,90],hd:180,A:[[92,96,-1],[90,96,-1]],L:[[104,G,-1],[102,G,-1]],say:"Pousse dans les talons, serre les fessiers 2 s"}]},
  "Chat–vache":{dur:1800,hold:600,zones:["thor","lumb"],kf:[
-   quad({c:-8,hd:40,H:[66,74],say:"Expire : dos rond, menton rentré",arr:[{at:"mid",dir:90,dy:-4,len:8}]}),
-   quad({c:5,hd:-45,H:[66,72],say:"Inspire : creuse doucement, regard devant",arr:[{at:"mid",dir:-90,dy:-12,len:8}]})]},
+   quad({c:8,hd:40,H:[66,74],say:"Expire : dos rond, menton rentré",arr:[{at:"mid",dir:90,dy:-4,len:8}]}),
+   quad({c:-6,hd:-45,H:[66,72],say:"Inspire : creuse doucement, regard devant",arr:[{at:"mid",dir:-90,dy:-12,len:8}]})]},
  "Rotation thoracique (bras qui passe)":{dur:1700,hold:800,zones:["thor"],
    notes:[{at:"H",text:"bassin immobile",x:40,y:52}],kf:[
    quad({ta:-12,hd:60,A:[[70,90,1],[100,G,-1]],say:"Le bras glisse sous le corps",arr:[{at:"handN",dir:-80,len:14}]}),
@@ -438,8 +438,8 @@ const ANIMS={
    quad({A:[[102,G,-1],[150,58,-1]],L:[[16,72,-1],[42,G,-1]],say:"Change de côté"})]},
  "Posture de l'enfant":{dur:2400,hold:500,zones:["lumb","thor"],
    notes:[{at:"H",text:"fesses vers les talons",x:34,y:62},{at:"handN",text:"bras loin devant",x:120,y:76}],kf:[
-   {H:[42,84],ta:6,hd:8,c:-3,ft:"point",A:[[134,G,1],[132,G,1]],L:[[40,G,-1],[38,G,-1]],say:"Inspire dans le bas du dos"},
-   {H:[40,82],ta:9,hd:12,c:-5,ft:"point",A:[[132,G,1],[130,G,1]],L:[[40,G,-1],[38,G,-1]],say:"Expire, relâche les épaules"}]},
+   {H:[42,84],ta:6,hd:8,c:4,ft:"point",A:[[134,G,1],[132,G,1]],L:[[40,G,-1],[38,G,-1]],say:"Inspire dans le bas du dos"},
+   {H:[40,82],ta:9,hd:12,c:6,ft:"point",A:[[132,G,1],[130,G,1]],L:[[40,G,-1],[38,G,-1]],say:"Expire, relâche les épaules"}]},
  "Sphinx (extension McKenzie)":{dur:1800,hold:1200,zones:["lumb"],
    notes:[{at:"H",text:"bassin reste au sol",x:40,y:70},{at:"elbowN",text:"coudes sous les épaules",x:118,y:62}],kf:[
    prone({A:[[114,96,-1],[112,96,-1]],say:"À plat ventre, front vers le sol",arr:[{at:"S",dir:-90,len:9}]}),
@@ -450,8 +450,8 @@ const ANIMS={
    {view:"top",H:[75,68],ta:-90,hd:-90,ft:"none",A:[[-20,32,1],[170,32,-1]],L:[[60,150,-1],[90,150,1]],say:"T : serre les omoplates, décolle 2 s",arr:[{at:"handN",dir:-60,dx:6}]}]},
  "Pompes scapulaires":{dur:1100,hold:500,zones:["thor"],
    notes:[{at:"elbowN",text:"coudes tendus",x:126,y:62}],kf:[
-   Object.assign({},plank,{say:"Repousse le sol : écarte les omoplates",arr:[{at:"thor",dir:90,dy:-2,len:7}]}),
-   Object.assign({},plank,{H:[67,77.5],S:[100,63],c:3,say:"Laisse la poitrine descendre : rapproche-les",arr:[{at:"thor",dir:-90,dy:-12,len:7}]})]},
+   Object.assign({},plank,{c:3,say:"Repousse le sol : écarte les omoplates",arr:[{at:"thor",dir:90,dy:-2,len:7}]}),
+   Object.assign({},plank,{H:[67,77.5],S:[100,63],c:-3,say:"Laisse la poitrine descendre : rapproche-les",arr:[{at:"thor",dir:-90,dy:-12,len:7}]})]},
  "Planche":{dur:2000,hold:0,zones:["belly"],
    notes:[{at:"H",text:"bassin aligné",x:62,y:56},{at:"elbowN",text:"coudes sous épaules",x:122,y:58}],kf:[
    {H:[66,85],S:[100,77],hd:-10,ft:90,A:[[117,G,1],[115,G,1]],L:[[-10,104,1],[-12,104,1]],say:"Serre fessiers et abdos, respire"},
