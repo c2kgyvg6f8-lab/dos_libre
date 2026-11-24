@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Dos libre">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Dos libre · 15 min</title>
+<title>Dos libre · 16 min</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -64,7 +64,7 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 .fig{background:var(--card);border:1px solid var(--line);border-radius:18px;margin-top:14px;overflow:hidden}
 .fig svg{display:block;width:100%;height:auto;max-height:240px}
 .trow{display:flex;align-items:center;gap:16px;margin:12px 0 2px}
-.trow .next{margin:0;flex:1}
+.next{margin:2px 2px 12px}
 .ring-wrap{position:relative;width:104px;flex:none;aspect-ratio:1}
 .ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
@@ -77,9 +77,9 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 .why b{color:var(--ink)}
 .next{font-size:13px;color:var(--muted);margin:12px 2px 0}
 .next b{color:var(--ink);font-weight:500}
-.ctrl{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:auto;padding-top:18px}
-.cb{width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
-.cb.main{width:76px;height:76px;background:var(--ink);color:#fff;border:0}
+.ctrl{display:flex;align-items:center;justify-content:center;gap:12px;flex:1}
+.cb{width:50px;height:50px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.cb.main{width:68px;height:68px;background:var(--ink);color:#fff;border:0}
 .cb svg{width:24px;height:24px}
 .cb.main svg{width:30px;height:30px}
 .rest .ex-name{color:var(--muted)}
@@ -129,7 +129,7 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 <section class="screen on" id="home">
   <div class="hero">
     <div class="eyebrow">Routine du matin · sans matériel</div>
-    <h1>Dos libre,<br>15 minutes.</h1>
+    <h1>Dos libre,<br>16 minutes.</h1>
     <p>Mobilité, gainage et étirements issus des exercices les plus utilisés en kinésithérapie pour relâcher le haut du dos, la nuque et les lombaires.</p>
   </div>
   <div class="tabs"><button class="on" data-p="pRoutine">Routine</button><button data-p="pFood">Petit-déj</button></div>
@@ -186,14 +186,14 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
       </svg>
       <div class="ring-c"><div class="t" id="tnum">0</div><div class="side" id="side"></div></div>
     </div>
-    <div class="next" id="next"></div>
-  </div>
-  <div class="cues" id="cuesBox"><ul id="cues"></ul><div class="why" id="why"></div></div>
   <div class="ctrl">
-    <button class="cb" id="prev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM9.5 12 18 18V6z"/></svg></button>
-    <button class="cb main" id="pp" aria-label="Pause"><svg id="ppIco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
-    <button class="cb" id="skip" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+      <button class="cb" id="prev" aria-label="Précédent"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM9.5 12 18 18V6z"/></svg></button>
+      <button class="cb main" id="pp" aria-label="Pause"><svg id="ppIco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+      <button class="cb" id="skip" aria-label="Suivant"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 18l8.5-6L6 6z"/></svg></button>
+    </div>
   </div>
+  <div class="next" id="next"></div>
+  <div class="cues" id="cuesBox"><ul id="cues"></ul><div class="why" id="why"></div></div>
 </section>
 
 <!-- DONE -->
@@ -215,13 +215,13 @@ button{font:inherit;border:0;cursor:pointer;color:inherit;background:none}
 </div></div>
 
 <script>
-const APP_VERSION="2026-11-23.1";
+const APP_VERSION="2026-11-24.1";
 const PH = {
   mob:{label:"Mobilité", color:"#C9772F"},
   ren:{label:"Renforcement", color:"#1F5E73"},
   eti:{label:"Étirement", color:"#6E8B4E"}
 };
-// Programme : 18 exercices + 5 s de transition = 15 min pile
+// Programme : 18 exercices, 10 s de transition
 const EX = [
  {ph:"mob", name:"Respiration diaphragmatique", sub:"Allongé sur le dos, genoux fléchis", d:30,
   cues:["Une main sur le ventre, une sur la poitrine","Inspire par le nez 4 s : le ventre se gonfle, la poitrine bouge peu","Expire lentement 6 s, épaules relâchées"],
@@ -278,7 +278,7 @@ const EX = [
   cues:["Main sous la fesse pour fixer l'épaule","Incline l'oreille opposée vers l'épaule","Ajoute une légère rotation du nez vers l'aisselle","Pas de traction forcée avec l'autre main"],
   why:"<b>Pourquoi :</b> relâche trapèze supérieur et élévateur de la scapula, souvent responsables des nœuds dans le haut du dos."}
 ];
-const TRANS = 5, PREP = 5;
+const TRANS = 10, PREP = 5;
 
 // ===== Animation du personnage =====
 const G=95, LT=36, UA=18, FA=17, TH=22, SH=21;
